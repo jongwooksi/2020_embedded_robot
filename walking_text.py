@@ -32,31 +32,33 @@ def draw_lines(img, lines, color=[0, 0, 255], thickness=3):
     x=-1
     y=-1
     gradient=0
-    
+    maxvalue = 0
+    point=[0,0,0,0]
     if lines is None:
         return x, y, gradient
    
     for line in lines:
         for x1,y1,x2,y2 in line:
                            
-            if y2 < 180 and y1 < 180 :
+            if y2 < 120 and y1 < 120 :
                 continue
             
             if  x1 == x2 :
                 continue
-                 
-            if y2 < y1:
-                y = y2
-                x = x2
+             
+            if maxvalue < max(y1, y2):
+                maxvalue = max(y1, y2)
+            
                 gradient = (y2-y1)/(x2-x1)
                 
-            else:
-                y = y1
-                x = x1
-                gradient = (y2-y1)/(x2-x1)
+                x = int((x1+x2)/2)
+                point[0] = x1
+                point[1] = y1
+                point[2] = x2
+                point[3] = y2
                 
-            cv2.line(img, (x1, y1), (x2, y2), color, thickness)
-					
+    cv2.line(img, (point[0], point[1]), (point[2], point[3]), color, thickness)
+            
     return x, y, gradient
     
 if __name__ == '__main__':
@@ -83,6 +85,8 @@ if __name__ == '__main__':
 
     TX_data_py2(serial_port, 29)
 	
+    nonvisible = 0
+    
     while True:
         _,frame = cap.read()
         img = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
@@ -91,81 +95,70 @@ if __name__ == '__main__':
         upper_yellow = np.array([50, 255, 255])
         mask = cv2.inRange(img, lower_yellow, upper_yellow)
         image_result = cv2.bitwise_and(frame, frame,mask = mask)
-        cv2.imshow("a", image_result)
-        cv2.waitKey(1)
+        #cv2.imshow("a", image_result)
+        #cv2.waitKey(1)
         gray_img = grayscale(image_result)
         blur_img = gaussian_blur(gray_img, 3)
+        
         canny_img = canny(blur_img, 20, 30)
+        '''
         kernel = np.ones((21,21), np.uint8)
         canny_img = cv2.dilate(canny_img, kernel, iterations=2)
         kernel2 = np.ones((25,25), np.uint8)
         canny_img = cv2.erode(canny_img, kernel2, iterations=3)
-        
+        '''
+        #cv2.imshow("az", canny_img)
+        #cv2.waitKey(1)
         
         hough_img, x, y, gradient = hough_lines(canny_img, 1, 1 * np.pi/180, 30, 0, 20 )
         result = weighted_img(hough_img, frame)
         
-        #print(gradient)
+        print(gradient)
         
-        if get_distance() >= 2:
-            f = open("start.txt", 'r')
-            text = f.readline()
-            print(text)
+        #if x == -2:
+        #    break
+        if  x == -1:
+            nonvisible += 1
             
-            if text == "E":
-                TX_data_py2(serial_port, 33)
-                
-            elif text == "W":
-                TX_data_py2(serial_port, 34)
-                
-            elif text == "S":
-                TX_data_py2(serial_port, 35)
-                
-            elif text == "N":
-                TX_data_py2(serial_port, 36)
-           
             
-            TX_data_py2(serial_port, 44)
-            TX_data_py2(serial_port, 9) 
-            TX_data_py2(serial_port, 9) 
+            if nonvisible > 1:
+                TX_data_py2(serial_port, 9)
+                break
+                
+                
+            continue
+            
+        if gradient>0.5 and gradient< 2.5:
             TX_data_py2(serial_port, 9)
-            TX_data_py2(serial_port, 20)
+            time.sleep(0.2)
+            continue
+        
+        elif gradient<-0.5 and gradient>-2.5:
+            TX_data_py2(serial_port, 7) 
+            time.sleep(0.2) 
+            continue
+        print(x)
+        print(gradient)
+            
+        if x<315 and x > 200:
             TX_data_py2(serial_port, 20)
             
             time.sleep(0.2)
-            break
+                
+        elif x>10 and x < 160:
+            TX_data_py2(serial_port, 15)
+             
+            time.sleep(0.2)   
         
-        cv2.imshow("img", result)
-        cv2.waitKey(1)
-        
-        if gradient>0 and gradient< 2.5:
-            TX_data_py2(serial_port, 7)
-            time.sleep(0.1)
-            continue
-        
-        elif gradient<0 and gradient>-2.5:
-            TX_data_py2(serial_port, 9) 
-            time.sleep(0.1) 
-            continue
-           
-        if  x == -1:
-            continue
-            
-        elif x<315 and x > 220:
-            TX_data_py2(serial_port, 20)
-            time.sleep(0.5)
-            
-        elif x>10 and x < 180:
-            TX_data_py2(serial_port, 15)  
-            time.sleep(0.5)   
-        
-        elif x>=180 and x<=220:
+        elif x>=160 and x<=200:
             TX_data_py2(serial_port, 47)  
             time.sleep(0.2)
             
-        
-            
+        cv2.imshow("img", result)
+        cv2.waitKey(1)     
+        #time.sleep(5)
        
+        
         
 
     cap.release()

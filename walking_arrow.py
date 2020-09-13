@@ -27,10 +27,11 @@ def weighted_img(img, initial_img, a=1, b=1., c=0.):
     return cv2.addWeighted(initial_img, a, img, b, c)
  
  
+
 def draw_lines(img, lines, color=[0, 0, 255], thickness=3):
    
     x=-1
-    y=240
+    y=-1
     gradient=0
     
     if lines is None:
@@ -38,13 +39,13 @@ def draw_lines(img, lines, color=[0, 0, 255], thickness=3):
    
     for line in lines:
         for x1,y1,x2,y2 in line:
-             
                            
-            if max(y2, y1) < 180 or x1 == x2 :
+            if y2 < 180 and y1 < 180 :
                 continue
-            if (y1-y2)**2 < (x1-x2)**2 :
+            
+            if  x1 == x2 :
                 continue
-                    
+                 
             if y2 < y1:
                 y = y2
                 x = x2
@@ -56,7 +57,7 @@ def draw_lines(img, lines, color=[0, 0, 255], thickness=3):
                 gradient = (y2-y1)/(x2-x1)
                 
             cv2.line(img, (x1, y1), (x2, y2), color, thickness)
-					
+            
     return x, y, gradient
     
 if __name__ == '__main__':
@@ -100,10 +101,10 @@ if __name__ == '__main__':
         gray_img = grayscale(image_result)
         blur_img = gaussian_blur(gray_img, 3)
         canny_img = canny(blur_img, 20, 30)
-        kernel = np.ones((21,21), np.uint8)
-        canny_img = cv2.dilate(canny_img, kernel, iterations=2)
-        kernel2 = np.ones((25,25), np.uint8)
-        canny_img = cv2.erode(canny_img, kernel2, iterations=3)
+        #kernel = np.ones((21,21), np.uint8)
+        #canny_img = cv2.dilate(canny_img, kernel, iterations=2)
+        #kernel2 = np.ones((25,25), np.uint8)
+        #canny_img = cv2.erode(canny_img, kernel2, iterations=3)
         
         
         hough_img, x, y, gradient = hough_lines(canny_img, 1, 1 * np.pi/180, 30, 0, 20 )
@@ -130,32 +131,34 @@ if __name__ == '__main__':
                 TX_data_py2(serial_port, 9)
                 cross = True
                 time.sleep(0.1)
-            
-        if gradient>0 and gradient< 2 :
+        if  x == -1:
+            continue
+                
+        if gradient>0 and gradient< 2.5 :
             TX_data_py2(serial_port, 1)
             time.sleep(0.1)
            
         
-        elif gradient<0 and gradient>-2 :
+        elif gradient<0 and gradient>-2.5 :
             TX_data_py2(serial_port, 3) 
             time.sleep(0.1) 
             
            
-        if  x == -1:
-            continue
-            
-        elif x<310 and x > 235:
-            TX_data_py2(serial_port, 20)
-            time.sleep(0.5)
-            
-        elif x>10 and x < 165:
-            TX_data_py2(serial_port, 15)  
-            time.sleep(0.5)    
         
-        elif x>=180 and x<=220:
-            TX_data_py2(serial_port, 47)  
-            time.sleep(0.5)
             
+        if x<315 and x > 200:
+            TX_data_py2(serial_port, 20)
+            
+            time.sleep(0.2)
+                
+        elif x>10 and x < 160:
+            TX_data_py2(serial_port, 15)
+             
+            time.sleep(0.2)   
+        
+        elif x>=160 and x<=200:
+            TX_data_py2(serial_port, 47)  
+            time.sleep(0.2)
         
             
         cv2.imshow("img", result)

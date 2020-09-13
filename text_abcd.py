@@ -48,7 +48,8 @@ def textImageProcessing(img, frame):
 
                 distance_bottom = (((x+w) - bottom[0]) ** 2 + ((y+h) - bottom[1]) ** 2) ** 0.5
 
-                
+                return [[x, y], [x + w, y], [x, y + h], [x + w, y + h]], frame
+                '''
                 if distance_top < w * 0.1 or distance_top > w * 0.9:
                     print("회전없음")
                     return [[x, y], [x + w, y], [x, y + h], [x + w, y + h]], frame
@@ -64,6 +65,7 @@ def textImageProcessing(img, frame):
                 else:
                     print("오른쪽")
                     return [top, right, left, bottom], frame
+                '''
 
 
     return [[-1,-1], [-1,-1], [-1,-1], [-1,-1]], frame
@@ -76,7 +78,7 @@ def textRecog(textimage):
     result[:, 64:128] = textimage
 
     cv2.imshow("canny", result)
-    key = cv2.waitKey(1)
+    cv2.waitKey(1)
 
     text_image = pytesseract.image_to_string(result)
     text_image.replace(" ","")
@@ -103,7 +105,7 @@ def textRecog(textimage):
         result[:, 64:128] = textimage
 
         cv2.imshow("canny", result)
-        key = cv2.waitKey(1)
+        cv2.waitKey(1)
 
         text_image = pytesseract.image_to_string(result, lang='eng')
         text_image.replace(" ","")
@@ -130,7 +132,7 @@ def textRecog(textimage):
         result[:, 64:128] = textimage
 
         cv2.imshow("canny", result)
-        key = cv2.waitKey(1)
+        cv2.waitKey(1)
 
         text_image = pytesseract.image_to_string(result, lang='eng')
         text_image.replace(" ","")
@@ -152,12 +154,13 @@ def textRecog(textimage):
 
 def Recog(textimage, img_color):
     img_hsv = cv2.cvtColor(img_color, cv2.COLOR_BGR2HSV)
-
-    lower_red = np.array([0, 50, 50])
-    upper_red = np.array([10, 255, 255])
+    cv2.imshow('ss',img_hsv)
+    cv2.waitKey(1)
+    lower_red = np.array([0, 80, 50])
+    upper_red = np.array([20, 255, 255])
     mask0 = cv2.inRange(img_hsv, lower_red, upper_red)
 
-    lower_red = np.array([170, 50, 50])
+    lower_red = np.array([160, 80, 50])
     upper_red = np.array([180, 255, 255])
     mask1 = cv2.inRange(img_hsv, lower_red, upper_red)
 
@@ -169,7 +172,8 @@ def Recog(textimage, img_color):
 
     red_hsv = img_hsv.copy()
     blue_hsv = img_hsv.copy()
-
+    cv2.imshow('sss',red_hsv)
+    cv2.waitKey(1)
     red_count = len(red_hsv[np.where(red_mask != 0)])
     blue_count = len(blue_hsv[np.where(blue_mask != 0)])
 
@@ -217,6 +221,16 @@ if __name__ == '__main__':
     TX_data_py2(serial_port, 43)
 
     
+    f = open("area.txt","r")
+    
+    area = f.readline()
+    f.close()
+    
+    
+    
+    f2 = open("result.txt","w")
+    f3 = open("color.txt","w")
+    
     while True:
         _,frame = cap.read()
         img = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
@@ -245,26 +259,39 @@ if __name__ == '__main__':
         textimage = textimage[8:110, 8:110]
         textimage = cv2.resize(textimage, (64, 64))
 
-
+        
         img_color =  cv2.warpPerspective(frame, matrix, (128, 128))
         img_color = img_color[8:110, 8:110]
         img_color = cv2.resize(img_color, (64, 64))
 
         text, color = Recog(textimage, img_color)
 
-        
+        #print(text, color)
         if text == "A":
-            TX_data_py2(serial_port, 39)
+            f3.write(color)
+            if area == "dangerous":
+                f2.write(text)
+                TX_data_py2(serial_port, 9)
             break
         elif text == "B":
-            TX_data_py2(serial_port, 40)
+            f3.write(color)
+            if area == "dangerous":
+                f2.write(text)
+                TX_data_py2(serial_port, 9)
             break
         elif text == "C":
-            TX_data_py2(serial_port, 41)
+            f3.write(color)
+            if area == "dangerous":
+                f2.write(text)
+                TX_data_py2(serial_port, 9)
             break
         elif text == "D":
-            TX_data_py2(serial_port, 42)
+            f3.write(color)
+            if area == "dangerous":
+                f2.write(text)
+                TX_data_py2(serial_port, 9)
             break
+        
         
     
             
@@ -274,7 +301,7 @@ if __name__ == '__main__':
 
     cap.release()
     cv2.destroyAllWindows()
-    
+    f.close()
     time.sleep(1)
     exit(1)
    
