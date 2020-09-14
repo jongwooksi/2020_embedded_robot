@@ -11,7 +11,7 @@ from serialdata import *
 
 def textImageProcessing(img, frame):
 
-    img = cv2.Canny(img, 100, 255)
+    img = cv2.Canny(img, 15, 40)
 
     kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (3, 3))
 
@@ -156,11 +156,11 @@ def Recog(textimage, img_color):
     img_hsv = cv2.cvtColor(img_color, cv2.COLOR_BGR2HSV)
     cv2.imshow('ss',img_hsv)
     cv2.waitKey(1)
-    lower_red = np.array([0, 80, 50])
+    lower_red = np.array([0, 120, 40])
     upper_red = np.array([20, 255, 255])
     mask0 = cv2.inRange(img_hsv, lower_red, upper_red)
 
-    lower_red = np.array([160, 80, 50])
+    lower_red = np.array([160, 120, 40])
     upper_red = np.array([180, 255, 255])
     mask1 = cv2.inRange(img_hsv, lower_red, upper_red)
 
@@ -256,12 +256,12 @@ if __name__ == '__main__':
         matrix = cv2.getPerspectiveTransform(pts1, pts2)
         textimage = cv2.warpPerspective(dst, matrix, (128, 128))
 
-        textimage = textimage[8:110, 8:110]
+        textimage = textimage[12:110, 12:110]
         textimage = cv2.resize(textimage, (64, 64))
 
         
         img_color =  cv2.warpPerspective(frame, matrix, (128, 128))
-        img_color = img_color[8:110, 8:110]
+        img_color = img_color[12:110, 12:110]
         img_color = cv2.resize(img_color, (64, 64))
 
         text, color = Recog(textimage, img_color)

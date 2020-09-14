@@ -28,7 +28,7 @@ if __name__ == '__main__':
     cap.set(4, H_View_size)
     cap.set(5, FPS)  
     
-
+    TX_data_py2(serial_port, 30)
     TX_data_py2(serial_port, 31)
 	
     lower_green = (35, 30, 30)
@@ -60,6 +60,7 @@ if __name__ == '__main__':
            f.write("safe")
            f.close()
            TX_data_py2(serial_port, 38)
+           TX_data_py2(serial_port, 21)
            break
            
         elif dan_count > 15000:
@@ -69,7 +70,7 @@ if __name__ == '__main__':
            f.close()
            
            TX_data_py2(serial_port, 37)
-           TX_data_py2(serial_port, 7)
+           TX_data_py2(serial_port, 21)
            
            break
 
