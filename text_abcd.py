@@ -200,6 +200,9 @@ if __name__ == '__main__':
        
     serial_port = serial.Serial('/dev/ttyS0', BPS, timeout=0.01)
     serial_port.flush() # serial cls
+    serial_t = Thread(target=Receiving, args=(serial_port,))
+    serial_t.daemon = True
+    serial_t.start()
     
         
     W_View_size = 320

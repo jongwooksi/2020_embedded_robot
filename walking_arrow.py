@@ -146,7 +146,7 @@ if __name__ == '__main__':
            
         
             
-        if x<315 and x > 200:
+        if x > 200:
             TX_data_py2(serial_port, 20)
             
             time.sleep(0.2)

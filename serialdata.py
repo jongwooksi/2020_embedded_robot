@@ -15,8 +15,8 @@ distance_count_25 = 0
 def TX_data_py2(ser, one_byte): 
 
     ser.write(serial.to_bytes([one_byte])) 
-    Receiving(ser)
-    
+    '''Receiving(ser)
+    '''
 
 def RX_data(ser):
 

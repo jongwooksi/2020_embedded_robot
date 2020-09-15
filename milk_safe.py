@@ -9,9 +9,9 @@ def preprocessing(frame):
 	
     img = cv2.Canny(frame, 50, 255)
 
-    #kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (3, 3))
+    kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (3, 3))
 
-    #img = cv2.dilate(img, kernel, iterations=2)
+    img = cv2.dilate(img, kernel, iterations=2)
 
     #img = cv2.morphologyEx(img, cv2.MORPH_CLOSE, kernel)
     #img = cv2.erode(img, kernel)
@@ -30,13 +30,13 @@ def preprocessing(frame):
         
         area = point[2] * point[3]
         
-        if area > 2000:
+        if area > 1500:
         
             cv2.rectangle(frame, (point[0], point[1]), (point[0] + point[2], point[1]+point[3]), (0, 255, 0), 1)        
-            return frame, point
+            return point
             
     
-    return frame, [-1, -1, -1, -1]        
+    return [-1, -1, -1, -1]        
             
 if __name__ == '__main__':
 
@@ -46,7 +46,12 @@ if __name__ == '__main__':
     serial_port = serial.Serial('/dev/ttyS0', BPS, timeout=0.01)
     serial_port.flush() # serial cls
     
-        
+ 
+    
+    serial_t = Thread(target=Receiving, args=(serial_port,))
+    serial_t.daemon = True
+    serial_t.start()
+    
     W_View_size = 320
     H_View_size = int(W_View_size / 1.333)
 
@@ -57,7 +62,9 @@ if __name__ == '__main__':
 
     cap.set(3, W_View_size)
     cap.set(4, H_View_size)
-    cap.set(5, FPS)  
+    cap.set(5, FPS)
+    #cap.set(cv2.CAP_PROP_BUFFERSIZE,0)
+    
     
     
     lower_red = np.array([0, 120, 40])
@@ -67,12 +74,15 @@ if __name__ == '__main__':
     lower_red = np.array([160, 120, 40])
     upper_red = np.array([180, 255, 255])
     
-    TX_data_py2(serial_port, 31)
+    TX_data_py2(serial_port, 31) # Head Down 60
     flag = False
     milk_flag = False
     flagcounter = 0
+    count = 0
     
     while True:
+        
+                
         _,frame = cap.read()
         img_hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
 		
@@ -80,9 +90,13 @@ if __name__ == '__main__':
         mask1 = cv2.inRange(img_hsv, lower_red, upper_red)
         red_mask = mask0 + mask1
         image_result = cv2.bitwise_and(frame, frame,mask = red_mask)
+        #time.sleep(1)
         
-        img_area, [x, y, w, h] = preprocessing(image_result)
+        [x, y, w, h] = preprocessing(image_result)
         
+        cv2.imshow('sss',image_result)
+        
+        cv2.waitKey(1)
         
         print( x, y, x+w, y+h)
         loc = (x + x + w)/2
@@ -91,24 +105,24 @@ if __name__ == '__main__':
         
         
         if milk_flag is True:
-            if  loc > 180:
-                TX_data_py2(serial_port, 20)
+            if  loc > 200:
+                TX_data_py2(serial_port, 20) #Right
                 
                 time.sleep(1)
                 
             elif loc>10 and loc < 160:
-                TX_data_py2(serial_port, 15)
+                TX_data_py2(serial_port, 15) #Left
                 
-                time.sleep(1)   
+                time.sleep(1)  
             
-            elif loc>=160 and loc<=180:
-                TX_data_py2(serial_port, 45)
+            elif loc>=160 and loc<=200:
+                TX_data_py2(serial_port, 45) #Milk Up
                 time.sleep(1)
                 break
             
             
         if flag is False and milk_flag is False:
-            if  loc > 180:
+            if  loc > 200:
                 TX_data_py2(serial_port, 20)
                 
                 time.sleep(1)
@@ -116,27 +130,29 @@ if __name__ == '__main__':
             elif loc>10 and loc < 160:
                 TX_data_py2(serial_port, 15)
                 
-                time.sleep(1)   
+                time.sleep(1)  
             
-            elif loc>=160 and loc<=180:
+            elif loc>=160 and loc<=200:
                 flag = True
-                TX_data_py2(serial_port, 29)	          
-                time.sleep(1)
-                TX_data_py2(serial_port, 47)
+                TX_data_py2(serial_port, 29) #Head Down 80   
+                time.sleep(2)
+                
+
                 continue
             
 
 
         if flag is True and milk_flag is False:
-            time.sleep(2)
+            #time.sleep(0.2)
             print(y + h)
-            
-            if flagcounter > 5:
+            print(flagcounter)
+            if flagcounter > 2:
                 milk_flag = True
                 
                 
-            if y + h > 150:
+            if y + h > 180:
                 flagcounter += 1
+                
                 time.sleep(1)
                 
             else :
@@ -151,8 +167,7 @@ if __name__ == '__main__':
                 
                 
         #time.sleep(5)
-        cv2.imshow('sss',image_result)
-        cv2.waitKey(1)
+        
 
     cap.release()
     cv2.destroyAllWindows()

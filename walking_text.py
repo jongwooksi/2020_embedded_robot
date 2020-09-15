@@ -90,7 +90,7 @@ if __name__ == '__main__':
     W_View_size = 320
     H_View_size = int(W_View_size / 1.333)
 
-    FPS         = 10  #PI CAMERA: 320 x 240 = MAX 90
+    FPS         = 1  #PI CAMERA: 320 x 240 = MAX 90
 
 
     cap = cv2.VideoCapture(0)
@@ -98,10 +98,10 @@ if __name__ == '__main__':
     cap.set(3, W_View_size)
     cap.set(4, H_View_size)
     cap.set(5, FPS)  
-    
+    cap.set(cv2.CAP_PROP_BUFFERSIZE,0)
 
     TX_data_py2(serial_port, 29)
-	time.sleep(1)
+	
     nonvisible = 0
     
     while True:
@@ -171,8 +171,7 @@ if __name__ == '__main__':
             TX_data_py2(serial_port, 47)  
             time.sleep(1)
             
-        cv2.imshow("img", result)
-        cv2.waitKey(1)     
+             
         #time.sleep(5)
        
         

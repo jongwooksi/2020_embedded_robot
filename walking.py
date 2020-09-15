@@ -32,31 +32,50 @@ def draw_lines(img, lines, color=[0, 0, 255], thickness=3):
     x=-1
     y=-1
     gradient=0
-    
+    maxvalue = 0
+    point=[0,0,0,0]
     if lines is None:
         return x, y, gradient
    
     for line in lines:
         for x1,y1,x2,y2 in line:
                            
-            if y2 < 180 and y1 < 180 :
+            if y2 < 120 and y1 < 120 :
                 continue
             
-            if  x1 == x2 :
-                continue
+             
+            if maxvalue < max(y1, y2):
+                maxvalue = max(y1, y2)
+            
+                gradient = (y2-y1)/(x2-x1+0.00001)
+                
+                x = max(x1, x2)
+                point[0] = x1
+                point[1] = y1
+                point[2] = x2
+                point[3] = y2
+       
+    if point[0] == 0 and point[1] == 0:
+         for line in lines:
+            for x1,y1,x2,y2 in line:
+                               
+                
                  
-            if y2 < y1:
-                y = y2
-                x = x2
-                gradient = (y2-y1)/(x2-x1)
+                if maxvalue < max(y1, y2):
+                    maxvalue = max(y1, y2)
                 
-            else:
-                y = y1
-                x = x1
-                gradient = (y2-y1)/(x2-x1)
-                
-            cv2.line(img, (x1, y1), (x2, y2), color, thickness)
-					
+                    gradient = (y2-y1)/(x2-x1+0.00001)
+                    
+                    x = max(x1, x2)
+                    point[0] = x1
+                    point[1] = y1
+                    point[2] = x2
+                    point[3] = y2
+            
+        
+        
+    cv2.line(img, (point[0], point[1]), (point[2], point[3]), color, thickness)
+            
     return x, y, gradient
     
 if __name__ == '__main__':
@@ -66,12 +85,14 @@ if __name__ == '__main__':
        
     serial_port = serial.Serial('/dev/ttyS0', BPS, timeout=0.01)
     serial_port.flush() # serial cls
-    
+    serial_t = Thread(target=Receiving, args=(serial_port,))
+    serial_t.daemon = True
+    serial_t.start()
         
     W_View_size = 320
     H_View_size = int(W_View_size / 1.333)
 
-    FPS         = 10  #PI CAMERA: 320 x 240 = MAX 90
+    FPS         = 1  #PI CAMERA: 320 x 240 = MAX 90
 
 
     cap = cv2.VideoCapture(0)
@@ -96,10 +117,6 @@ if __name__ == '__main__':
         gray_img = grayscale(image_result)
         blur_img = gaussian_blur(gray_img, 3)
         canny_img = canny(blur_img, 20, 30)
-        kernel = np.ones((21,21), np.uint8)
-        canny_img = cv2.dilate(canny_img, kernel, iterations=2)
-        kernel2 = np.ones((25,25), np.uint8)
-        canny_img = cv2.erode(canny_img, kernel2, iterations=3)
         
         
         hough_img, x, y, gradient = hough_lines(canny_img, 1, 1 * np.pi/180, 30, 0, 20 )
@@ -151,21 +168,23 @@ if __name__ == '__main__':
         if  x == -1:
             continue
             
-        elif x<315 and x > 220:
+        if  x > 200:
             TX_data_py2(serial_port, 20)
-            time.sleep(0.5)
             
-        elif x>10 and x < 180:
-            TX_data_py2(serial_port, 15)  
-            time.sleep(0.5)   
+            time.sleep(1)
+                
+        elif x>10 and x < 160:
+            TX_data_py2(serial_port, 15)
+             
+            time.sleep(1)   
         
-        elif x>=180 and x<=220:
+        elif x>=160 and x<=200:
             TX_data_py2(serial_port, 47)  
-            time.sleep(0.2)
+            time.sleep(1)
             
         
             
-       
+        print(x)   
         
 
     cap.release()
