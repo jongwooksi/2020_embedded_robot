@@ -85,7 +85,9 @@ if __name__ == '__main__':
        
     serial_port = serial.Serial('/dev/ttyS0', BPS, timeout=0.01)
     serial_port.flush() # serial cls
-    
+    serial_t = Thread(target=Receiving, args=(serial_port,))
+    serial_t.daemon = True
+    serial_t.start()
         
     W_View_size = 320
     H_View_size = int(W_View_size / 1.333)
@@ -145,33 +147,30 @@ if __name__ == '__main__':
                 
             continue
             
-        if gradient>0.5 and gradient< 3.5:
-            TX_data_py2(serial_port, 9)
-            time.sleep(1)
+        if gradient>0 and gradient< 2.5:
+            TX_data_py2(serial_port, 7)
+            time.sleep(0.1)
             continue
         
-        elif gradient<-0.5 and gradient>-3.5:
-            TX_data_py2(serial_port, 7) 
-            time.sleep(1) 
+        elif gradient<0 and gradient>-2.5:
+            TX_data_py2(serial_port, 9) 
+            time.sleep(0.1) 
             continue
-        print(x)
-        print(gradient)
+   
             
-        if  x > 190:
+        if  x > 200:
             TX_data_py2(serial_port, 20)
             
             time.sleep(1)
                 
-        elif x>10 and x < 170:
+        elif x>10 and x < 160:
             TX_data_py2(serial_port, 15)
              
             time.sleep(1)   
         
-        elif x>=170 and x<=190:
+        elif x>=160 and x<=200:
             TX_data_py2(serial_port, 47)  
             time.sleep(1)
-            
-             
         #time.sleep(5)
        
         
