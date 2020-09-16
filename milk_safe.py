@@ -94,9 +94,6 @@ if __name__ == '__main__':
         
         [x, y, w, h] = preprocessing(image_result)
         
-        cv2.imshow('sss',image_result)
-        
-        cv2.waitKey(1)
         
         print( x, y, x+w, y+h)
         loc = (x + x + w)/2
@@ -107,17 +104,14 @@ if __name__ == '__main__':
         if milk_flag is True:
             if  loc > 200:
                 TX_data_py2(serial_port, 20) #Right
-                
-                time.sleep(1)
+            
                 
             elif loc>10 and loc < 160:
                 TX_data_py2(serial_port, 15) #Left
-                
-                time.sleep(1)  
+               
             
             elif loc>=160 and loc<=200:
                 TX_data_py2(serial_port, 45) #Milk Up
-                time.sleep(1)
                 break
             
             
@@ -125,20 +119,18 @@ if __name__ == '__main__':
             if  loc > 200:
                 TX_data_py2(serial_port, 20)
                 
-                time.sleep(1)
+            
                     
             elif loc>10 and loc < 160:
                 TX_data_py2(serial_port, 15)
                 
-                time.sleep(1)  
+         
             
             elif loc>=160 and loc<=200:
                 flag = True
                 TX_data_py2(serial_port, 29) #Head Down 80   
-                time.sleep(2)
                 
-
-                continue
+                
             
 
 
@@ -152,12 +144,11 @@ if __name__ == '__main__':
                 
             if y + h > 180:
                 flagcounter += 1
-                
-                time.sleep(1)
+   
                 
             else :
                 TX_data_py2(serial_port, 47)
-                time.sleep(1)
+            
                 
                    
            
@@ -165,8 +156,10 @@ if __name__ == '__main__':
                 
             
                 
+        cv2.imshow('sss',image_result)
+        cv2.waitKey(1)
                 
-        #time.sleep(5)
+        time.sleep(1)
         
 
     cap.release()

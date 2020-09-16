@@ -77,18 +77,9 @@ def draw_lines(img, lines, color=[0, 0, 255], thickness=3):
     cv2.line(img, (point[0], point[1]), (point[2], point[3]), color, thickness)
             
     return x, y, gradient
+
+def loop(serial_port):
     
-if __name__ == '__main__':
-
-    BPS =  4800  # 4800,9600,14400, 19200,28800, 57600, 115200
-
-       
-    serial_port = serial.Serial('/dev/ttyS0', BPS, timeout=0.01)
-    serial_port.flush() # serial cls
-    serial_t = Thread(target=Receiving, args=(serial_port,))
-    serial_t.daemon = True
-    serial_t.start()
-        
     W_View_size = 320
     H_View_size = int(W_View_size / 1.333)
 
@@ -103,7 +94,7 @@ if __name__ == '__main__':
     
 
     TX_data_py2(serial_port, 29)
-	
+    
     while True:
         _,frame = cap.read()
         img = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
@@ -123,6 +114,7 @@ if __name__ == '__main__':
         result = weighted_img(hough_img, frame)
         
         #print(gradient)
+        TX_data_py2(serial_port, 48)
         
         if get_distance() >= 2:
             f = open("start.txt", 'r')
@@ -142,7 +134,7 @@ if __name__ == '__main__':
                 TX_data_py2(serial_port, 36)
            
             
-            TX_data_py2(serial_port, 44)
+            
             TX_data_py2(serial_port, 9) 
             TX_data_py2(serial_port, 9) 
             TX_data_py2(serial_port, 9)
@@ -156,13 +148,13 @@ if __name__ == '__main__':
         cv2.waitKey(1)
         
         if gradient>0 and gradient< 2.5:
-            TX_data_py2(serial_port, 7)
-            time.sleep(0.1)
+            TX_data_py2(serial_port, 4)
+            time.sleep(1)
             continue
         
         elif gradient<0 and gradient>-2.5:
-            TX_data_py2(serial_port, 9) 
-            time.sleep(0.1) 
+            TX_data_py2(serial_port, 6) 
+            time.sleep(1) 
             continue
            
         if  x == -1:
@@ -171,20 +163,20 @@ if __name__ == '__main__':
         if  x > 200:
             TX_data_py2(serial_port, 20)
             
-            time.sleep(1)
+          
                 
         elif x>10 and x < 160:
             TX_data_py2(serial_port, 15)
              
-            time.sleep(1)   
+           
         
         elif x>=160 and x<=200:
             TX_data_py2(serial_port, 47)  
-            time.sleep(1)
+            
             
         
             
-        print(x)   
+        time.sleep(1) 
         
 
     cap.release()
@@ -192,3 +184,28 @@ if __name__ == '__main__':
     
     time.sleep(1)
     exit(1)
+
+
+if __name__ == '__main__':
+
+    BPS =  4800  # 4800,9600,14400, 19200,28800, 57600, 115200
+
+       
+    serial_port = serial.Serial('/dev/ttyS0', BPS, timeout=0.01)
+    serial_port.flush() # serial cls
+    
+    
+    serial_t = Thread(target=Receiving, args=(serial_port,))
+    #serial_t.daemon = True
+    serial_t.start()
+    
+    serial_d = Thread(target=loop, args=(serial_port,))
+    #serial_d.daemon = True
+    serial_d.start()
+    
+    serial_t.join()
+    serial_d.join()
+    
+    
+	
+    

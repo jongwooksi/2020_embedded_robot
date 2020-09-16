@@ -88,11 +88,12 @@ if __name__ == '__main__':
     serial_t = Thread(target=Receiving, args=(serial_port,))
     serial_t.daemon = True
     serial_t.start()
-        
+    
+    
     W_View_size = 320
     H_View_size = int(W_View_size / 1.333)
 
-    FPS         = 70  #PI CAMERA: 320 x 240 = MAX 90
+    FPS         = 1  #PI CAMERA: 320 x 240 = MAX 90
 
 
     cap = cv2.VideoCapture(0)
@@ -124,18 +125,18 @@ if __name__ == '__main__':
         
         #print(gradient)
         
-       
+        
         cv2.imshow("img", result)
         cv2.waitKey(1)
         
         if gradient>0 and gradient< 2.5:
-            TX_data_py2(serial_port, 7)
-            time.sleep(0.1)
+            TX_data_py2(serial_port, 4)
+            time.sleep(1)
             continue
         
         elif gradient<0 and gradient>-2.5:
-            TX_data_py2(serial_port, 9) 
-            time.sleep(0.1) 
+            TX_data_py2(serial_port, 6) 
+            time.sleep(1) 
             continue
            
         if  x == -1:
@@ -144,19 +145,20 @@ if __name__ == '__main__':
         if  x > 200:
             TX_data_py2(serial_port, 20)
             
-            time.sleep(1)
+          
                 
         elif x>10 and x < 160:
             TX_data_py2(serial_port, 15)
              
-            time.sleep(1)   
+           
         
         elif x>=160 and x<=200:
-            TX_data_py2(serial_port, 47)  
-            time.sleep(1)
+            break 
+            
+            
         
             
-       
+        time.sleep(1) 
         
 
     cap.release()

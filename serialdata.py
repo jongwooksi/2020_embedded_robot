@@ -10,55 +10,56 @@ Read_RX =  0
 receiving_exit = 1
 threading_Time = 0.01
 distance_count = 0
-distance_count_25 = 0
+distance_exit = 1
 
 def TX_data_py2(ser, one_byte): 
 
+    while receiving_exit == 2:
+        time.sleep(threading_Time)
+        
     ser.write(serial.to_bytes([one_byte])) 
-    '''Receiving(ser)
-    '''
+    
+    
 
-def RX_data(ser):
 
-    if ser.inWaiting() > 0:
-        result = ser.read(1)
-        RX = ord(result)
-        return RX
-    else:
-        return 0
- 
+
 
 def Receiving(ser):
     global receiving_exit
-
+    global distance_count
     global X_255_point
     global Y_255_point
     global X_Size
     global Y_Size
     global Area, Angle
-    global distance_count
     
-    receiving_exit = 1
     
     while True:
-        if receiving_exit == 0:
-            break
+        receiving_exit = 1
         time.sleep(threading_Time)
-        while ser.inWaiting() > 0:
-            result = ser.read(1)
-            RX = ord(result)
-            print ("RX=" + str(RX))
-            
-        
-            if RX == 50:
-                receiving_exit = 0
+        while True:
+            if receiving_exit == 0:
                 break
-   
-                
-            if RX == 99:
-                if distance_count < 3:
+            time.sleep(threading_Time)
+            while ser.inWaiting() > 0:
+                receiving_exit = 2
+                result = ser.read(1)
+                RX = ord(result)
+                print ("RX=" + str(RX))
+            
+                if RX == 99:
                     distance_count += 1
-                    print(distance_count)
+                    if distance_count > 3:
+                       receiving_exit = 0
+                       break
+                    
+                if RX == 50:
+                    receiving_exit = 0
+                    break
+
+
             
 def get_distance():
     return distance_count
+              
+    

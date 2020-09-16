@@ -93,7 +93,7 @@ if __name__ == '__main__':
     W_View_size = 320
     H_View_size = int(W_View_size / 1.333)
 
-    FPS         = 70  #PI CAMERA: 320 x 240 = MAX 90
+    FPS         = 10  #PI CAMERA: 320 x 240 = MAX 90
 
 
     cap = cv2.VideoCapture(0)
@@ -137,7 +137,7 @@ if __name__ == '__main__':
                 TX_data_py2(serial_port, 47)  
                 time.sleep(0.5)
                 
-            if get_distance() > 0  and arrow == "left":
+            if get_distance() == 0  and arrow == "left":
                 TX_data_py2(serial_port, 7)
                 TX_data_py2(serial_port, 7)
                 TX_data_py2(serial_port, 7)
@@ -145,7 +145,7 @@ if __name__ == '__main__':
                 cross = True
                 time.sleep(0.1)
                 
-            elif get_distance() > 0  and arrow == "right":
+            elif get_distance() == 0  and arrow == "right":
                 TX_data_py2(serial_port, 9)
                 TX_data_py2(serial_port, 9)
                 TX_data_py2(serial_port, 9)
