@@ -6,18 +6,7 @@ import serial
 import time
 from serialdata import *
 
-
-if __name__ == '__main__':
-
-    BPS =  4800  # 4800,9600,14400, 19200,28800, 57600, 115200
-
-       
-    serial_port = serial.Serial('/dev/ttyS0', BPS, timeout=0.01)
-    serial_port.flush() # serial cls
-    serial_t = Thread(target=Receiving, args=(serial_port,))
-    serial_t.daemon = True
-    serial_t.start()
-        
+def loop(serial_port):
     W_View_size = 320
     H_View_size = int(W_View_size / 1.333)
 
@@ -92,13 +81,39 @@ if __name__ == '__main__':
         time.sleep(0.1)
         #cv2.imshow("MASK",mask)
 
-        key = cv2.waitKey(1)
-        if key ==27:
-            break
+        
        
        
     
 
-f.close()
-cap.release()
-cv2.destroyAllWindows()    
+    f.close()
+    cap.release()
+    cv2.destroyAllWindows() 
+    time.sleep(1)
+    exit(1)
+
+if __name__ == '__main__':
+
+    BPS =  4800  # 4800,9600,14400, 19200,28800, 57600, 115200
+
+       
+    serial_port = serial.Serial('/dev/ttyS0', BPS, timeout=0.01)
+    serial_port.flush() # serial cls
+    
+    
+    serial_t = Thread(target=Receiving, args=(serial_port,))
+    serial_t.daemon = True
+    
+    
+    serial_d = Thread(target=loop, args=(serial_port,))
+    serial_d.daemon = True
+    
+    print("start")
+    serial_t.start()
+    serial_d.start()
+    
+   
+    serial_d.join()
+    print("end")
+        
+       

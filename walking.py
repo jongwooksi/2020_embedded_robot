@@ -117,6 +117,7 @@ def loop(serial_port):
         TX_data_py2(serial_port, 48)
         
         if get_distance() >= 2:
+            
             f = open("start.txt", 'r')
             text = f.readline()
             print(text)
@@ -133,13 +134,9 @@ def loop(serial_port):
             elif text == "N":
                 TX_data_py2(serial_port, 36)
            
-            
-            
-            TX_data_py2(serial_port, 9) 
-            TX_data_py2(serial_port, 9) 
-            TX_data_py2(serial_port, 9)
-            TX_data_py2(serial_port, 20)
-            TX_data_py2(serial_port, 20)
+      
+            time.sleep(5)
+            TX_data_py2(serial_port, 44)
             
             time.sleep(0.2)
             break
@@ -160,17 +157,17 @@ def loop(serial_port):
         if  x == -1:
             continue
             
-        if  x > 200:
+        if  x > 180:
             TX_data_py2(serial_port, 20)
             
           
                 
-        elif x>10 and x < 160:
+        elif x>10 and x < 140:
             TX_data_py2(serial_port, 15)
              
            
         
-        elif x>=160 and x<=200:
+        elif x>=140 and x<=180:
             TX_data_py2(serial_port, 47)  
             
             
@@ -196,16 +193,19 @@ if __name__ == '__main__':
     
     
     serial_t = Thread(target=Receiving, args=(serial_port,))
-    #serial_t.daemon = True
-    serial_t.start()
+    serial_t.daemon = True
+    
     
     serial_d = Thread(target=loop, args=(serial_port,))
-    #serial_d.daemon = True
+    serial_d.daemon = True
+    
+    print("start")
+    serial_t.start()
     serial_d.start()
     
-    serial_t.join()
+    #serial_t.join()
     serial_d.join()
-    
+    print("end")
     
 	
     

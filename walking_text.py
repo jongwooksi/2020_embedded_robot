@@ -55,40 +55,12 @@ def draw_lines(img, lines, color=[0, 0, 255], thickness=3):
                 point[2] = x2
                 point[3] = y2
        
-    if point[0] == 0 and point[1] == 0:
-         for line in lines:
-            for x1,y1,x2,y2 in line:
-                               
-                
-                 
-                if maxvalue < max(y1, y2):
-                    maxvalue = max(y1, y2)
-                
-                    gradient = (y2-y1)/(x2-x1+0.00001)
-                    
-                    x = max(x1, x2)
-                    point[0] = x1
-                    point[1] = y1
-                    point[2] = x2
-                    point[3] = y2
-            
-        
         
     cv2.line(img, (point[0], point[1]), (point[2], point[3]), color, thickness)
             
     return x, y, gradient
     
-if __name__ == '__main__':
-
-    BPS =  4800  # 4800,9600,14400, 19200,28800, 57600, 115200
-
-       
-    serial_port = serial.Serial('/dev/ttyS0', BPS, timeout=0.01)
-    serial_port.flush() # serial cls
-    serial_t = Thread(target=Receiving, args=(serial_port,))
-    serial_t.daemon = True
-    serial_t.start()
-        
+def loop(serial_port):
     W_View_size = 320
     H_View_size = int(W_View_size / 1.333)
 
@@ -100,7 +72,7 @@ if __name__ == '__main__':
     cap.set(3, W_View_size)
     cap.set(4, H_View_size)
     cap.set(5, FPS)  
-    cap.set(cv2.CAP_PROP_BUFFERSIZE,0)
+    
 
     TX_data_py2(serial_port, 29)
 	
@@ -114,34 +86,25 @@ if __name__ == '__main__':
         upper_yellow = np.array([50, 255, 255])
         mask = cv2.inRange(img, lower_yellow, upper_yellow)
         image_result = cv2.bitwise_and(frame, frame,mask = mask)
-        #cv2.imshow("a", image_result)
-        #cv2.waitKey(1)
+        
         gray_img = grayscale(image_result)
         blur_img = gaussian_blur(gray_img, 3)
         
         canny_img = canny(blur_img, 20, 30)
-        '''
-        kernel = np.ones((21,21), np.uint8)
-        canny_img = cv2.dilate(canny_img, kernel, iterations=2)
-        kernel2 = np.ones((25,25), np.uint8)
-        canny_img = cv2.erode(canny_img, kernel2, iterations=3)
-        '''
-        #cv2.imshow("az", canny_img)
-        #cv2.waitKey(1)
+        
         
         hough_img, x, y, gradient = hough_lines(canny_img, 1, 1 * np.pi/180, 30, 0, 20 )
         result = weighted_img(hough_img, frame)
         
-        print(gradient)
+        #print(gradient)
         
-        #if x == -2:
-        #    break
+       
         if  x == -1:
             nonvisible += 1
             
             
             if nonvisible > 1:
-                #TX_data_py2(serial_port, 9)
+                TX_data_py2(serial_port, 30)
                 break
                 
                 
@@ -158,19 +121,19 @@ if __name__ == '__main__':
             continue
    
             
-        if  x > 200:
+        if  x > 180:
             TX_data_py2(serial_port, 20)
             
-            time.sleep(1)
+            time.sleep(0.1)
                 
-        elif x>10 and x < 160:
+        elif x>10 and x < 140:
             TX_data_py2(serial_port, 15)
              
-            time.sleep(1)   
+            time.sleep(0.1)   
         
-        elif x>=160 and x<=200:
+        elif x>=140 and x<=180:
             TX_data_py2(serial_port, 47)  
-            time.sleep(1)
+            time.sleep(0.1)
         #time.sleep(5)
        
         
@@ -181,3 +144,29 @@ if __name__ == '__main__':
     
     time.sleep(1)
     exit(1)
+    
+if __name__ == '__main__':
+
+    BPS =  4800  # 4800,9600,14400, 19200,28800, 57600, 115200
+
+       
+    serial_port = serial.Serial('/dev/ttyS0', BPS, timeout=0.01)
+    serial_port.flush() # serial cls
+    
+    
+    serial_t = Thread(target=Receiving, args=(serial_port,))
+    serial_t.daemon = True
+    
+    
+    serial_d = Thread(target=loop, args=(serial_port,))
+    serial_d.daemon = True
+    
+    print("start")
+    serial_t.start()
+    serial_d.start()
+    
+    #serial_t.join()
+    serial_d.join()
+    print("end")
+        
+    

@@ -6,22 +6,12 @@ import time
 from serialdata import *
 
 
-    
-if __name__ == '__main__':
-
-    BPS =  4800  # 4800,9600,14400, 19200,28800, 57600, 115200
-
-       
-    serial_port = serial.Serial('/dev/ttyS0', BPS, timeout=0.01)
-    serial_port.flush() # serial cls
-    serial_t = Thread(target=Receiving, args=(serial_port,))
-    serial_t.daemon = True
-    serial_t.start()
-        
+def loop(serial_port):
+	
     W_View_size = 320
     H_View_size = int(W_View_size / 1.333)
 
-    FPS         = 20  #PI CAMERA: 320 x 240 = MAX 90
+    FPS         = 10  #PI CAMERA: 320 x 240 = MAX 90
 
 
     cap = cv2.VideoCapture(0)
@@ -29,8 +19,7 @@ if __name__ == '__main__':
     cap.set(3, W_View_size)
     cap.set(4, H_View_size)
     cap.set(5, FPS)  
-    
-    TX_data_py2(serial_port, 30)
+ 
     TX_data_py2(serial_port, 31)
 	
     lower_green = (35, 30, 30)
@@ -62,6 +51,7 @@ if __name__ == '__main__':
            f.write("safe")
            f.close()
            TX_data_py2(serial_port, 38)
+           time.sleep(3)
            TX_data_py2(serial_port, 21)
            break
            
@@ -72,6 +62,7 @@ if __name__ == '__main__':
            f.close()
            
            TX_data_py2(serial_port, 37)
+           time.sleep(3)
            TX_data_py2(serial_port, 21)
            
            break
@@ -86,3 +77,27 @@ if __name__ == '__main__':
     
     time.sleep(1)
     exit(1)
+    
+if __name__ == '__main__':
+
+    BPS =  4800  # 4800,9600,14400, 19200,28800, 57600, 115200
+
+       
+    serial_port = serial.Serial('/dev/ttyS0', BPS, timeout=0.01)
+    serial_port.flush() # serial cls
+    
+    
+    serial_t = Thread(target=Receiving, args=(serial_port,))
+    serial_t.daemon = True
+    
+    
+    serial_d = Thread(target=loop, args=(serial_port,))
+    serial_d.daemon = True
+    
+    print("start")
+    serial_t.start()
+    serial_d.start()
+    
+    #serial_t.join()
+    serial_d.join()
+    print("end")

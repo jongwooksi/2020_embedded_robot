@@ -37,21 +37,8 @@ def preprocessing(frame):
             
     
     return [-1, -1, -1, -1]        
-            
-if __name__ == '__main__':
 
-    BPS =  4800  # 4800,9600,14400, 19200,28800, 57600, 115200
-
-       
-    serial_port = serial.Serial('/dev/ttyS0', BPS, timeout=0.01)
-    serial_port.flush() # serial cls
-    
- 
-    
-    serial_t = Thread(target=Receiving, args=(serial_port,))
-    serial_t.daemon = True
-    serial_t.start()
-    
+def loop(serial_port):
     W_View_size = 320
     H_View_size = int(W_View_size / 1.333)
 
@@ -71,12 +58,17 @@ if __name__ == '__main__':
     upper_red = np.array([20, 255, 255])
    
 
-    lower_red = np.array([160, 120, 40])
-    upper_red = np.array([180, 255, 255])
+    lower_red2 = np.array([160, 120, 40])
+    upper_red2 = np.array([180, 255, 255])
+    
+    lower_black = np.array([0, 0, 0])
+    upper_black = np.array([180, 255, 50])
     
     TX_data_py2(serial_port, 31) # Head Down 60
     flag = False
     milk_flag = False
+    drop_flag = False
+    
     flagcounter = 0
     count = 0
     
@@ -86,8 +78,24 @@ if __name__ == '__main__':
         _,frame = cap.read()
         img_hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
 		
+        
+        
+        if drop_flag is True:
+            dan_mask = cv2.inRange(img_hsv, lower_black, upper_black)
+            dan_count = len(img_hsv[np.where(dan_mask != 0)])
+            TX_data_py2(serial_port, 51)
+            time.sleep(2)
+            print(dan_count)
+            cv2.imshow('img', frame)
+            cv2.waitKey(1)
+            if dan_count < 20000:
+                TX_data_py2(serial_port, 26)
+                break
+            else:
+                continue
+                
         mask0 = cv2.inRange(img_hsv, lower_red, upper_red)
-        mask1 = cv2.inRange(img_hsv, lower_red, upper_red)
+        mask1 = cv2.inRange(img_hsv, lower_red2, upper_red2)
         red_mask = mask0 + mask1
         image_result = cv2.bitwise_and(frame, frame,mask = red_mask)
         #time.sleep(1)
@@ -102,31 +110,34 @@ if __name__ == '__main__':
         
         
         if milk_flag is True:
-            if  loc > 200:
+            if  loc > 170:
                 TX_data_py2(serial_port, 20) #Right
             
                 
-            elif loc>10 and loc < 160:
+            elif loc>10 and loc < 130:
                 TX_data_py2(serial_port, 15) #Left
                
             
-            elif loc>=160 and loc<=200:
+            elif loc>=130 and loc<=170:
                 TX_data_py2(serial_port, 45) #Milk Up
-                break
-            
+                
+                drop_flag = True
+                continue
+                
+                
             
         if flag is False and milk_flag is False:
-            if  loc > 200:
+            if  loc > 180:
                 TX_data_py2(serial_port, 20)
                 
             
                     
-            elif loc>10 and loc < 160:
+            elif loc>10 and loc < 140:
                 TX_data_py2(serial_port, 15)
                 
          
             
-            elif loc>=160 and loc<=200:
+            elif loc>=140 and loc<=180:
                 flag = True
                 TX_data_py2(serial_port, 29) #Head Down 80   
                 
@@ -147,18 +158,27 @@ if __name__ == '__main__':
    
                 
             else :
-                TX_data_py2(serial_port, 47)
-            
+                if  loc > 180:
+                    TX_data_py2(serial_port, 20)
                 
+            
+                    
+                elif loc>10 and loc < 140:
+                    TX_data_py2(serial_port, 15)
+                    
+             
+                
+                elif loc>=140 and loc<=180:
+                    TX_data_py2(serial_port, 47)
+            
+                elif loc< 0 :
+                    TX_data_py2(serial_port, 47)
+            
                    
            
                 
-                
-            
-                
-        cv2.imshow('sss',image_result)
-        cv2.waitKey(1)
-                
+      
+              
         time.sleep(1)
         
 
@@ -167,3 +187,29 @@ if __name__ == '__main__':
     
     time.sleep(1)
     exit(1)
+    
+    
+if __name__ == '__main__':
+
+    BPS =  4800  # 4800,9600,14400, 19200,28800, 57600, 115200
+
+       
+    serial_port = serial.Serial('/dev/ttyS0', BPS, timeout=0.01)
+    serial_port.flush() # serial cls
+    
+    
+    serial_t = Thread(target=Receiving, args=(serial_port,))
+    serial_t.daemon = True
+    
+    
+    serial_d = Thread(target=loop, args=(serial_port,))
+    serial_d.daemon = True
+    
+    print("start")
+    serial_t.start()
+    serial_d.start()
+    
+    #serial_t.join()
+    serial_d.join()
+    print("end")
+   
