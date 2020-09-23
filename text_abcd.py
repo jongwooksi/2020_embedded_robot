@@ -257,7 +257,7 @@ def loop(serial_port):
 
         text, color = Recog(textimage, img_color)
 
-        #print(text, color)
+        print("text : {} \ncolor : {}".format(text, color))
         if text == "A":
             f3.write(color)
             if area == "dangerous":
@@ -286,13 +286,15 @@ def loop(serial_port):
         
     
             
-        print("text : {} \ncolor : {}".format(text, color))
+        
 
 
 
     cap.release()
     cv2.destroyAllWindows()
     f.close()
+    f2.close()
+    f3.close()
     time.sleep(1)
     exit(1)
    

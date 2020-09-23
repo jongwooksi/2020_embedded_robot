@@ -85,6 +85,9 @@ def loop(serial_port):
         lower_yellow = np.array([10, 100, 100])
         upper_yellow = np.array([50, 255, 255])
         mask = cv2.inRange(img, lower_yellow, upper_yellow)
+        #yellow_count = len(img[np.where(mask != 0)])
+        
+        #print(yellow_count)
         image_result = cv2.bitwise_and(frame, frame,mask = mask)
         
         gray_img = grayscale(image_result)
@@ -98,23 +101,16 @@ def loop(serial_port):
         
         #print(gradient)
         
-       
         if  x == -1:
-            nonvisible += 1
-            
-            
-            if nonvisible > 1:
-                TX_data_py2(serial_port, 30)
-                break
-                
-                
-            continue
-        '''  
-        if gradient>0 and gradient< 2.5:
             TX_data_py2(serial_port, 7)
             time.sleep(0.1)
             continue
         
+        if gradient>0 and gradient< 2.5:
+            TX_data_py2(serial_port, 7)
+            time.sleep(0.1)
+            continue
+        '''    
         elif gradient<0 and gradient>-2.5:
             TX_data_py2(serial_port, 9) 
             time.sleep(0.1) 

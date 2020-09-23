@@ -64,123 +64,312 @@ def loop(serial_port):
     lower_black = np.array([0, 0, 0])
     upper_black = np.array([180, 255, 50])
     
-    TX_data_py2(serial_port, 31) # Head Down 60
+    lower_blue = np.array([90, 30, 30])
+    upper_blue = np.array([140, 255, 255])
+    
+    lower_green = np.array([35, 30, 30])
+    upper_green = np.array([100, 255, 255])
+    
+    
+    TX_data_py2(serial_port, 21) # Head Down 60
+    time.sleep(0.5)
+    TX_data_py2(serial_port, 31)
     flag = False
     milk_flag = False
     drop_flag = False
-    
+    safeloc_flag = False
     flagcounter = 0
     count = 0
     
-    while True:
-        
-                
-        _,frame = cap.read()
-        img_hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
-		
-        
-        
-        if drop_flag is True:
-            dan_mask = cv2.inRange(img_hsv, lower_black, upper_black)
-            dan_count = len(img_hsv[np.where(dan_mask != 0)])
-            TX_data_py2(serial_port, 51)
-            time.sleep(2)
-            print(dan_count)
-            cv2.imshow('img', frame)
-            cv2.waitKey(1)
-            if dan_count < 20000:
-                TX_data_py2(serial_port, 26)
-                break
-            else:
-                continue
-                
-        mask0 = cv2.inRange(img_hsv, lower_red, upper_red)
-        mask1 = cv2.inRange(img_hsv, lower_red2, upper_red2)
-        red_mask = mask0 + mask1
-        image_result = cv2.bitwise_and(frame, frame,mask = red_mask)
-        #time.sleep(1)
-        
-        [x, y, w, h] = preprocessing(image_result)
-        
-        
-        print( x, y, x+w, y+h)
-        loc = (x + x + w)/2
-        print(loc)
-        
-        
-        
-        if milk_flag is True:
-            if  loc > 170:
-                TX_data_py2(serial_port, 20) #Right
-            
-                
-            elif loc>10 and loc < 130:
-                TX_data_py2(serial_port, 15) #Left
-               
-            
-            elif loc>=130 and loc<=170:
-                TX_data_py2(serial_port, 45) #Milk Up
-                
-                drop_flag = True
-                continue
-                
-                
-            
-        if flag is False and milk_flag is False:
-            if  loc > 180:
-                TX_data_py2(serial_port, 20)
-                
+    f = open("area.txt","r")
+    
+    area = f.readline()
+    f.close()
+    
+    f3 = open("color.txt","r")
+    color = f3.readline()
+    f3.close()
+    
+    print(area)
+    print(color)
+    
+    if area == "dangerous":
+        while True:
             
                     
-            elif loc>10 and loc < 140:
-                TX_data_py2(serial_port, 15)
-                
-         
+            _,frame = cap.read()
+            img_hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
             
-            elif loc>=140 and loc<=180:
-                flag = True
-                TX_data_py2(serial_port, 29) #Head Down 80   
-                
-                
             
-
-
-        if flag is True and milk_flag is False:
-            #time.sleep(0.2)
-            print(y + h)
-            print(flagcounter)
-            if flagcounter > 2:
-                milk_flag = True
+            
+            if drop_flag is True:
+                dan_mask = cv2.inRange(img_hsv, lower_black, upper_black)
+                dan_count = len(img_hsv[np.where(dan_mask != 0)])
+                TX_data_py2(serial_port, 51)
+                time.sleep(2)
+                print(dan_count)
+                cv2.imshow('img', frame)
+                cv2.waitKey(1)
+                if dan_count < 27000:
+                    TX_data_py2(serial_port, 26)
+                    break
+                else:
+                    continue
+                    
+            if color == "red":
+                mask0 = cv2.inRange(img_hsv, lower_red, upper_red)
+                mask1 = cv2.inRange(img_hsv, lower_red2, upper_red2)
+                red_mask = mask0 + mask1
+                image_result = cv2.bitwise_and(frame, frame,mask = red_mask)
+                #time.sleep(1)
                 
+                [x, y, w, h] = preprocessing(image_result)
+             
+             
+            elif color == "blue":
                 
-            if y + h > 180:
-                flagcounter += 1
-   
+                blue_mask = cv2.inRange(img_hsv, lower_blue, upper_blue)
+                image_result = cv2.bitwise_and(frame, frame,mask = blue_mask)
+                #time.sleep(1)
                 
-            else :
+                [x, y, w, h] = preprocessing(image_result)
+                
+                        
+            print( x, y, x+w, y+h)
+            loc = (x + x + w)/2
+            print(loc)
+            
+            
+            
+            if milk_flag is True:
+                if  loc > 170:
+                    TX_data_py2(serial_port, 20) #Right
+                
+                    
+                elif loc>10 and loc < 130:
+                    TX_data_py2(serial_port, 15) #Left
+                   
+                
+                elif loc>=130 and loc<=170:
+                    TX_data_py2(serial_port, 45) #Milk Up
+                    
+                    drop_flag = True
+                    continue
+                    
+                
+                    
+                
+            if flag is False and milk_flag is False:
                 if  loc > 180:
                     TX_data_py2(serial_port, 20)
-                
-            
                     
+                
+                        
                 elif loc>10 and loc < 140:
                     TX_data_py2(serial_port, 15)
                     
              
                 
                 elif loc>=140 and loc<=180:
+                    flag = True
+                    TX_data_py2(serial_port, 29) #Head Down 80   
+                    
+                elif loc < 0 :
                     TX_data_py2(serial_port, 47)
-            
-                elif loc< 0 :
-                    TX_data_py2(serial_port, 47)
-            
-                   
-           
+                    time.sleep(1)
+                    
                 
-      
-              
-        time.sleep(1)
+
+
+            if flag is True and milk_flag is False:
+                #time.sleep(0.2)
+                print(y + h)
+                print(flagcounter)
+                if flagcounter > 2:
+                    milk_flag = True
+                    
+                    
+                if color == "red" and y + h > 180:
+                    flagcounter += 1
+       
+                elif color == "blue" and y + h > 190:
+                    flagcounter += 1
+       
+                    
+                else :
+                    if  loc > 180:
+                        TX_data_py2(serial_port, 20)
+                    
+                
+                        
+                    elif loc>10 and loc < 140:
+                        TX_data_py2(serial_port, 15)
+                        
+                 
+                    
+                    elif loc>=140 and loc<=180:
+                        TX_data_py2(serial_port, 47)
+                
+                    elif loc< 0 :
+                        TX_data_py2(serial_port, 47)
+   
+            time.sleep(1) 
+            
+
+    if area == "safe":
+        while True:
+            _,frame = cap.read()
+            img_hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
+            
+            if safeloc_flag is True:
+                while True:
+                    TX_data_py2(serial_port, 30)
+                    dan_mask = cv2.inRange(img_hsv, lower_green, upper_green)
+                    dan_count = len(img_hsv[np.where(dan_mask != 0)])
+                    time.sleep(3)
+                    if dan_count > 1000 :
+                        safeloc = "right"
+                        print(safeloc)
+                        TX_data_py2(serial_port, 21)
+                        safeloc_flag = False
+                        drop_flag = True
+                        break
+                        
+                    TX_data_py2(serial_port, 28)
+                    time.sleep(3)
+                    if dan_count > 1000 :
+                        safeloc = "right"
+                        print(safeloc)
+                        TX_data_py2(serial_port, 21)
+                        safeloc_flag = False
+                        drop_flag = True
+                        break
         
+                    
+       
+       
+            if drop_flag is True:
+                dan_mask = cv2.inRange(img_hsv, lower_green, upper_green)
+                dan_count = len(img_hsv[np.where(dan_mask != 0)])
+                
+                if safeloc == "right":
+                    TX_data_py2(serial_port, 20) #Right
+                
+                    
+                elif safeloc == "left":
+                    TX_data_py2(serial_port, 15) #Left
+                   
+
+                time.sleep(2)
+                print(dan_count)
+                cv2.imshow('img', frame)
+                cv2.waitKey(1)
+                if dan_count > 40000:
+                    TX_data_py2(serial_port, 26)
+                    break
+                else:
+                    continue
+                    
+            if color == "red":
+                mask0 = cv2.inRange(img_hsv, lower_red, upper_red)
+                mask1 = cv2.inRange(img_hsv, lower_red2, upper_red2)
+                red_mask = mask0 + mask1
+                image_result = cv2.bitwise_and(frame, frame,mask = red_mask)
+                #time.sleep(1)
+                
+                [x, y, w, h] = preprocessing(image_result)
+             
+             
+            elif color == "blue":
+                
+                blue_mask = cv2.inRange(img_hsv, lower_blue, upper_blue)
+                image_result = cv2.bitwise_and(frame, frame,mask = blue_mask)
+                #time.sleep(1)
+                
+                [x, y, w, h] = preprocessing(image_result)
+            cv2.imshow('aaa', image_result)
+            cv2.waitKey(1)    
+                        
+            print( x, y, x+w, y+h)
+            loc = (x + x + w)/2
+            print(loc)
+            
+            
+            
+            if milk_flag is True:
+                if  loc > 170:
+                    TX_data_py2(serial_port, 20) #Right
+                
+                    
+                elif loc>10 and loc < 130:
+                    TX_data_py2(serial_port, 15) #Left
+                   
+                
+                elif loc>=130 and loc<=170:
+                    TX_data_py2(serial_port, 45) #Milk Up
+                    
+                    safeloc_flag = True
+                    continue
+                    
+                
+                    
+                
+            if flag is False and milk_flag is False:
+                
+                
+                
+                if  loc > 180:
+                    TX_data_py2(serial_port, 20)
+                    
+                
+                        
+                elif loc>10 and loc < 140:
+                    TX_data_py2(serial_port, 15)
+                    
+             
+                
+                elif loc>=140 and loc<=180:
+                    flag = True
+                    TX_data_py2(serial_port, 29) #Head Down 80   
+                    
+                
+                    
+                
+
+
+            if flag is True and milk_flag is False:
+                #time.sleep(0.2)
+                print(y + h)
+                print(flagcounter)
+                if flagcounter > 2:
+                    milk_flag = True
+                    
+                if color == "red" and y + h > 180:
+                    flagcounter += 1
+       
+                elif color == "blue" and y + h > 190:
+                    flagcounter += 1
+       
+                    
+                else :
+                    if  loc > 180:
+                        TX_data_py2(serial_port, 20)
+                    
+                
+                        
+                    elif loc>10 and loc < 140:
+                        TX_data_py2(serial_port, 15)
+                        
+                 
+                    
+                    elif loc>=140 and loc<=180:
+                        TX_data_py2(serial_port, 47)
+                
+                    elif loc< 0 :
+                        TX_data_py2(serial_port, 47)
+   
+            time.sleep(1)
+            
 
     cap.release()
     cv2.destroyAllWindows()

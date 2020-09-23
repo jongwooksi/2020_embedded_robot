@@ -114,7 +114,7 @@ def loop(serial_port):
         result = weighted_img(hough_img, frame)
         
         #print(gradient)
-        TX_data_py2(serial_port, 48)
+        #TX_data_py2(serial_port, 48)
         
         if get_distance() >= 2:
             
