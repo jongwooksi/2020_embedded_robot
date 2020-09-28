@@ -111,7 +111,7 @@ def loop(serial_port):
                 cv2.imshow('img', frame)
                 cv2.waitKey(1)
                 if dan_count < 27000:
-                    TX_data_py2(serial_port, 26)
+                    TX_data_py2(serial_port, 53)
                     break
                 else:
                     continue
@@ -230,19 +230,24 @@ def loop(serial_port):
                     if dan_count > 1000 :
                         safeloc = "right"
                         print(safeloc)
+                        time.sleep(2)
                         TX_data_py2(serial_port, 21)
                         safeloc_flag = False
                         drop_flag = True
+                        TX_data_py2(serial_port, 28)
+                        time.sleep(3)
                         break
                         
-                    TX_data_py2(serial_port, 28)
-                    time.sleep(3)
+                    
                     if dan_count > 1000 :
                         safeloc = "right"
                         print(safeloc)
+                        time.sleep(2)
                         TX_data_py2(serial_port, 21)
                         safeloc_flag = False
                         drop_flag = True
+                        TX_data_py2(serial_port, 28)
+                        time.sleep(3)
                         break
         
                     
@@ -253,19 +258,19 @@ def loop(serial_port):
                 dan_count = len(img_hsv[np.where(dan_mask != 0)])
                 
                 if safeloc == "right":
-                    TX_data_py2(serial_port, 20) #Right
+                    TX_data_py2(serial_port, 52) #Right
                 
                     
                 elif safeloc == "left":
-                    TX_data_py2(serial_port, 15) #Left
+                    TX_data_py2(serial_port, 50) #Left
                    
 
                 time.sleep(2)
                 print(dan_count)
                 cv2.imshow('img', frame)
                 cv2.waitKey(1)
-                if dan_count > 40000:
-                    TX_data_py2(serial_port, 26)
+                if dan_count > 35000:
+                    TX_data_py2(serial_port, 53)
                     break
                 else:
                     continue
@@ -307,7 +312,8 @@ def loop(serial_port):
                 
                 elif loc>=130 and loc<=170:
                     TX_data_py2(serial_port, 45) #Milk Up
-                    
+                    #time.sleep(2)
+                    #TX_data_py2(serial_port, 54) 
                     safeloc_flag = True
                     continue
                     
