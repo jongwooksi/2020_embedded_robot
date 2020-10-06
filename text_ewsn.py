@@ -202,6 +202,7 @@ if __name__ == '__main__':
     f = open("start.txt","w")
 
     while True:
+        wait_receiving_exit()
         _,frame = cap.read()
         img = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         dst = img.copy()

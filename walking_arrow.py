@@ -80,6 +80,7 @@ def loop(serial_port):
     cross = False
     
     while True:
+        wait_receiving_exit()
         _,frame = cap.read()
         img = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
         

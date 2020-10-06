@@ -223,6 +223,7 @@ def loop(serial_port):
     f3 = open("color.txt","w")
     
     while True:
+        wait_receiving_exit()
         _,frame = cap.read()
         img = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         dst = img.copy()

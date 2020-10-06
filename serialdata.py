@@ -14,8 +14,9 @@ distance_exit = 1
 
 def TX_data_py2(ser, one_byte): 
 
-    while receiving_exit == 2:
+    while receiving_exit == 1:
         time.sleep(threading_Time)  
+        
         
     ser.write(serial.to_bytes([one_byte])) 
     
@@ -35,15 +36,15 @@ def Receiving(ser):
     
     
     while True:
-        receiving_exit = 1
-        time.sleep(threading_Time)
+        receiving_exit = 2
         while True:
             if receiving_exit == 0:
                 break
             time.sleep(threading_Time)
-            #print(receiving_exit)
+           
             while ser.inWaiting() > 0:
-                receiving_exit = 2
+                receiving_exit = 1
+             
                 result = ser.read(1)
                 RX = ord(result)
                 print ("RX=" + str(RX))
@@ -67,4 +68,8 @@ def get_distance():
     
     return distance_count
               
+    
+def wait_receiving_exit():
+    while receiving_exit == 1:
+        time.sleep(threading_Time) 
     

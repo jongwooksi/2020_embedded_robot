@@ -29,6 +29,7 @@ def loop(serial_port):
     upper = np.array([180, 255, 50])
     
     while True:
+        wait_receiving_exit()
         _,frame = cap.read()
   
         hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)

@@ -23,6 +23,7 @@ def loop(serial_port):
     TX_data_py2(serial_port, 43)
     
     while True:
+        wait_receiving_exit()
         _,frame = cap.read()
 
         hsv = cv2.cvtColor(frame,cv2.COLOR_BGR2HSV)
