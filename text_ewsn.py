@@ -18,7 +18,7 @@ def textImageProcessing(img, frame):
     
     kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (5, 5))
 
-    img = cv2.dilate(img, kernel, iterations=2)
+    img = cv2.dilate(img, kernel, iterations=1)
 
     img = cv2.morphologyEx(img, cv2.MORPH_CLOSE, kernel)
     
@@ -36,7 +36,7 @@ def textImageProcessing(img, frame):
         approx = cv2.approxPolyDP(c, 0.01 * cv2.arcLength(c, True), True)
 
 
-        if area > 2000:
+        if area > 2500:
             if len(approx) == 4:
                 cv2.drawContours(frame, [approx], 0, (0, 0, 255), 5)
                 #cv2.imshow("d", frame)
@@ -160,7 +160,7 @@ def Recog(textimage, img_color):
 
    
     lower = np.array([0, 0, 0])
-    upper = np.array([180, 255, 127])
+    upper = np.array([180, 255, 50])
     mask = cv2.inRange(img_hsv, lower, upper)
 
     hsv = img_hsv.copy()
@@ -173,26 +173,15 @@ def Recog(textimage, img_color):
 
     return text
 
-
-if __name__ == '__main__':
-
-    BPS =  4800  # 4800,9600,14400, 19200,28800, 57600, 115200
-
-       
-    serial_port = serial.Serial('/dev/ttyS0', BPS, timeout=0.01)
-    serial_port.flush() # serial cls
-    
-    serial_t = Thread(target=Receiving, args=(serial_port,))
-    serial_t.daemon = True
-    serial_t.start()
-         
+def loop(serial_port):
     W_View_size = 320
     H_View_size = int(W_View_size / 1.333)
 
     FPS         = 10  #PI CAMERA: 320 x 240 = MAX 90
 
 
-
+    TX_data_py2(serial_port, 54)
+    
     cap = cv2.VideoCapture(0)
 
     cap.set(3, W_View_size)
@@ -257,10 +246,37 @@ if __name__ == '__main__':
 
     cap.release()
     cv2.destroyAllWindows()
-    
+    TX_data_py2(serial_port, 26)
     time.sleep(1)
     print('recog')
     exit(1)
+    
+    
+if __name__ == '__main__':
+
+    BPS =  4800  # 4800,9600,14400, 19200,28800, 57600, 115200
+
+       
+    serial_port = serial.Serial('/dev/ttyS0', BPS, timeout=0.01)
+    serial_port.flush() # serial cls
+    
+    
+    serial_t = Thread(target=Receiving, args=(serial_port,))
+    serial_t.daemon = True
+    
+    
+    serial_d = Thread(target=loop, args=(serial_port,))
+    serial_d.daemon = True
+    
+    print("start")
+    serial_t.start()
+    serial_d.start()
+    
+   
+    serial_d.join()
+    print("end")
+         
+    
    
   
 

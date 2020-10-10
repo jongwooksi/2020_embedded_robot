@@ -40,12 +40,12 @@ def draw_lines(img, lines, color=[0, 0, 255], thickness=3):
     for line in lines:
         for x1,y1,x2,y2 in line:
                            
-            if y2 < 120 and y1 < 120 :
+            if y2 < 150 and y1 < 150 :
                 continue
             
              
-            if maxvalue < max(y1, y2):
-                maxvalue = max(y1, y2)
+            if maxvalue > abs(x1- x2):
+                maxvalue = abs(x1- x2)
             
                 gradient = (y2-y1)/(x2-x1+0.00001)
                 
@@ -55,29 +55,41 @@ def draw_lines(img, lines, color=[0, 0, 255], thickness=3):
                 point[2] = x2
                 point[3] = y2
        
-    if point[0] == 0 and point[1] == 0:
-         for line in lines:
-            for x1,y1,x2,y2 in line:
-                               
-                
-                 
-                if maxvalue < max(y1, y2):
-                    maxvalue = max(y1, y2)
-                
-                    gradient = (y2-y1)/(x2-x1+0.00001)
-                    
-                    x = max(x1, x2)
-                    point[0] = x1
-                    point[1] = y1
-                    point[2] = x2
-                    point[3] = y2
-            
-        
+    
         
     cv2.line(img, (point[0], point[1]), (point[2], point[3]), color, thickness)
             
     return x, y, gradient
 
+def finish():
+    f = open("result.txt","r")
+    TX_data_py2(serial_port, 37)
+    time.sleep(1)
+    text = f.readline()
+    print(text)
+	
+    for i in range(2):    
+       
+        print(text[i])
+        if text[i] == "A":
+            
+            TX_data_py2(serial_port, 39)
+            
+        elif text[i] == "B":
+            
+            TX_data_py2(serial_port, 40)
+            
+        elif text[i] == "C":
+            
+            TX_data_py2(serial_port, 41)
+            
+        elif text[i] == "D":
+            
+            TX_data_py2(serial_port, 42)
+           
+        
+        time.sleep(2)
+        
 def loop(serial_port):
     
     W_View_size = 320
@@ -119,15 +131,10 @@ def loop(serial_port):
         result = weighted_img(hough_img, frame)
         
        
-        if get_distance() >= 2:
-                
-            TX_data_py2(serial_port, 44)
-            
-            time.sleep(0.2)
-            break
-        
+       
         cv2.imshow("img", result)
         cv2.waitKey(1)
+        
         
         if gradient>0.5 and gradient< 2.5:
             TX_data_py2(serial_port, 4)
@@ -139,16 +146,19 @@ def loop(serial_port):
             time.sleep(1) 
             continue
          
-        elif gradient > -0.5 and gradient < 0.5:  
-			if arrow == 'left':
-				TX_data_py2(serial_port, 6)
-				time.sleep(1)
-				continue
-			elif arrow == 'right':
-				TX_data_py2(serial_port, 4) 
-				time.sleep(1) 
-				continue		
-				
+        elif gradient > -1 and gradient < 1:  
+            if arrow == 'left':
+                TX_data_py2(serial_port, 56)
+                time.sleep(1)
+                finish()
+                break
+                
+            elif arrow == 'right':
+                TX_data_py2(serial_port, 55) 
+                time.sleep(1)
+                finish() 
+                break
+        
         if  x == -1:
             continue
             

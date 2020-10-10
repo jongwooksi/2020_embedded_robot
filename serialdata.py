@@ -54,9 +54,12 @@ def Receiving(ser):
                     RX = ord(result)
                     if RX == 99:
                         distance_count += 1
-                        if distance_count > 3:
-                           receiving_exit = 0
-                           break
+                        receiving_exit = 0
+                        break
+                           
+                        #if distance_count > 3:
+                        #   receiving_exit = 0
+                        #   break
                     
                 if RX == 100:
                     receiving_exit = 0
@@ -72,4 +75,5 @@ def get_distance():
 def wait_receiving_exit():
     while receiving_exit == 1:
         time.sleep(threading_Time) 
+    time.sleep(0.5)
     

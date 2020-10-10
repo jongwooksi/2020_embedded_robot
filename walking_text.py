@@ -73,10 +73,10 @@ def loop(serial_port):
     cap.set(4, H_View_size)
     cap.set(5, FPS)  
     
-
+    TX_data_py2(serial_port, 21)
     TX_data_py2(serial_port, 29)
 	
-    nonvisible = 0
+   
     
     while True:
         wait_receiving_exit()
@@ -89,39 +89,24 @@ def loop(serial_port):
         image_result = cv2.bitwise_and(frame, frame,mask = mask)
         
         gray_img = grayscale(image_result)
-        blur_img = gaussian_blur(gray_img, 3)
+        #blur_img = gaussian_blur(gray_img, 3)
         
-        canny_img = canny(blur_img, 20, 30)
+        canny_img = canny(gray_img, 20, 30)
         
         
         hough_img, x, y, gradient = hough_lines(canny_img, 1, 1 * np.pi/180, 30, 0, 20 )
         result = weighted_img(hough_img, frame)
-        
+        cv2.imshow('oimg',canny_img)
+        cv2.waitKey(1)
         #print(gradient)
+        print(x)
         
-       
         if  x == -1:
-            nonvisible += 1
-            
-            
-            if nonvisible > 1:
-                TX_data_py2(serial_port, 30)
-                break
+            TX_data_py2(serial_port, 30)
+            break
                 
-                
-            continue
-        '''  
-        if gradient>0 and gradient< 2.5:
-            TX_data_py2(serial_port, 7)
-            time.sleep(0.1)
-            continue
+          
         
-        elif gradient<0 and gradient>-2.5:
-            TX_data_py2(serial_port, 9) 
-            time.sleep(0.1) 
-            continue
-        '''
-   
             
         if  x > 180:
             TX_data_py2(serial_port, 20)
@@ -134,7 +119,7 @@ def loop(serial_port):
             time.sleep(0.1)   
         
         elif x>=140 and x<=180:
-            TX_data_py2(serial_port, 47)  
+            TX_data_py2(serial_port, 2)  
             time.sleep(0.1)
         #time.sleep(5)
        

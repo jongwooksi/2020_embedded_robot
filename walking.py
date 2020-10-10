@@ -83,7 +83,7 @@ def loop(serial_port):
     W_View_size = 320
     H_View_size = int(W_View_size / 1.333)
 
-    FPS         = 1  #PI CAMERA: 320 x 240 = MAX 90
+    FPS         = 10  #PI CAMERA: 320 x 240 = MAX 90
 
 
     cap = cv2.VideoCapture(0)
@@ -136,8 +136,8 @@ def loop(serial_port):
             elif text == "N":
                 TX_data_py2(serial_port, 36)
            
-      
-            time.sleep(5)
+            TX_data_py2(serial_port, 47)
+            time.sleep(2)
             TX_data_py2(serial_port, 44)
             
             time.sleep(0.2)
@@ -159,17 +159,17 @@ def loop(serial_port):
         if  x == -1:
             continue
             
-        if  x > 180:
+        if  x > 185:
             TX_data_py2(serial_port, 20)
             
           
                 
-        elif x>10 and x < 140:
+        elif x>10 and x < 135:
             TX_data_py2(serial_port, 15)
              
            
         
-        elif x>=140 and x<=180:
+        elif x>=135 and x<=185:
             TX_data_py2(serial_port, 47)  
             
             

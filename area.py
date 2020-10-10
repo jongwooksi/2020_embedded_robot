@@ -19,7 +19,7 @@ def loop(serial_port):
     cap.set(3, W_View_size)
     cap.set(4, H_View_size)
     cap.set(5, FPS)  
- 
+    TX_data_py2(serial_port, 30)
     TX_data_py2(serial_port, 31)
 	
     lower_green = (35, 30, 30)
